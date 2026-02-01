@@ -1,6 +1,19 @@
-# Abijah Kajabika
+# Hand Tracking 3D Demo
 
-Personal site and newsletter signup. Built with React, TypeScript, and Vite.
+Interactive 3D hand tracking demonstration using MediaPipe and Three.js. Control 3D objects with hand gestures in real-time through your webcam. Features dynamic audio feedback and video recording capabilities.
+
+Built with TypeScript, Vite, Three.js, MediaPipe, and Tone.js.
+
+## Features
+
+- **Real-time hand tracking** via webcam using MediaPipe
+- **3D scene control** with hand gestures:
+  - Left hand controls rotation
+  - Right hand controls zoom (pinch gesture)
+  - Both hands together control pan
+- **Dynamic audio feedback** that responds to movement using Tone.js
+- **Video recording** of the interactive experience
+- **Mobile responsive** with split-screen layout
 
 ## Scripts
 
@@ -8,16 +21,20 @@ Personal site and newsletter signup. Built with React, TypeScript, and Vite.
 - **`yarn build`** — Production build (output in `dist/`)
 - **`yarn preview`** — Preview production build locally
 
-## Newsletter form (Formspree)
+## Usage
 
-The subscribe form uses [Formspree](https://formspree.io/) (free tier: 50 submissions/month).
+1. Start the development server with `yarn dev`
+2. Open the application in your browser
+3. Click "Start Hand Tracking" to begin
+4. Allow camera access when prompted
+5. Use your hands to control the 3D scene:
+   - Move your left hand to rotate the scene
+   - Use your right hand's pinch gesture to zoom in/out
+   - Use both hands together to pan the scene
+6. Click "Start Recording" to capture your interaction as a video
 
-1. Sign up at [formspree.io](https://formspree.io/)
-2. Create a new form and copy the form ID from the endpoint (e.g. `xyzabcde` in `formspree.io/f/xyzabcde`)
-3. Create a `.env` file in the project root with:
-   ```
-   VITE_FORMSPREE_FORM_ID=your_form_id
-   ```
-4. Restart the dev server. Submissions will appear in your Formspree dashboard and can be emailed to you.
+## Requirements
 
-Without `VITE_FORMSPREE_FORM_ID`, the form still works in dev but only logs the email to the console.
+- Modern browser with WebGL support
+- Webcam access
+- Microphone access (for audio feedback and recording)

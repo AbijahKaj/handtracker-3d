@@ -3,18 +3,6 @@ import { HandLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 import { generateSceneAssets, GeneratedAssets } from './sceneAssets';
 import { DynamicAudioEngine, AudioMetrics } from './audioEngine';
 import { VideoRecorder } from './videoRecorder';
-import ReactGA from 'react-ga4';
-import { inject } from '@vercel/analytics';
-
-// Initialize Google Analytics
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
-if (GA_MEASUREMENT_ID) {
-  ReactGA.initialize(GA_MEASUREMENT_ID);
-  ReactGA.send('pageview');
-}
-
-// Initialize Vercel Analytics
-inject();
 
 /*!
  * MIT License
