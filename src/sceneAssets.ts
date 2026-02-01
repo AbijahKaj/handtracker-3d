@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export interface AssetConfig {
   gridSize?: number;
@@ -18,10 +18,17 @@ export interface GeneratedAssets {
 }
 
 // Helper function to calculate size based on distance from center
-function getSizeFromCenter(x: number, y: number, gridSize: number, baseSize: number): number {
+function getSizeFromCenter(
+  x: number,
+  y: number,
+  gridSize: number,
+  baseSize: number,
+): number {
   const centerX = (gridSize - 1) / 2;
   const centerY = (gridSize - 1) / 2;
-  const distFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+  const distFromCenter = Math.sqrt(
+    Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2),
+  );
   const maxDist = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
   // Middle items are larger (1.5x), edges are smaller (0.7x)
   const sizeMultiplier = 1.5 - (distFromCenter / maxDist) * 0.8;
@@ -36,7 +43,7 @@ function createCube(
   position: THREE.Vector3,
   color: number,
   material: THREE.MeshStandardMaterial,
-  enableRotation: boolean
+  enableRotation: boolean,
 ): { mesh: THREE.Mesh; shouldRotate: boolean } {
   const cubeGeometry = new THREE.BoxGeometry(size, size, size);
   const cube = new THREE.Mesh(cubeGeometry, material.clone());
@@ -46,7 +53,7 @@ function createCube(
   cube.rotation.set(
     (Math.random() - 0.5) * 0.2,
     (Math.random() - 0.5) * 0.2,
-    (Math.random() - 0.5) * 0.2
+    (Math.random() - 0.5) * 0.2,
   );
 
   cube.position.copy(position);
@@ -61,7 +68,7 @@ function createSphere(
   size: number,
   position: THREE.Vector3,
   material: THREE.MeshStandardMaterial,
-  enableRotation: boolean
+  enableRotation: boolean,
 ): { mesh: THREE.Mesh; shouldRotate: boolean } {
   const sphereGeometry = new THREE.SphereGeometry(size, 32, 32);
   const sphere = new THREE.Mesh(sphereGeometry, material.clone());
@@ -82,7 +89,7 @@ function createCone(
   size: number,
   position: THREE.Vector3,
   material: THREE.MeshStandardMaterial,
-  enableRotation: boolean
+  enableRotation: boolean,
 ): { mesh: THREE.Mesh; shouldRotate: boolean } {
   const coneGeometry = new THREE.ConeGeometry(size, size * 1.5, 32);
   const cone = new THREE.Mesh(coneGeometry, material.clone());
@@ -95,7 +102,7 @@ function createCone(
   cone.rotation.set(
     (Math.random() - 0.5) * 0.2,
     (Math.random() - 0.5) * 0.2,
-    (Math.random() - 0.5) * 0.2
+    (Math.random() - 0.5) * 0.2,
   );
 
   cone.position.copy(position);
@@ -109,7 +116,7 @@ export function generateSceneAssets(
   scene: THREE.Scene,
   cubeMaterial: THREE.MeshStandardMaterial,
   sphereMaterial: THREE.MeshStandardMaterial,
-  config: AssetConfig = {}
+  config: AssetConfig = {},
 ): GeneratedAssets {
   const {
     gridSize = 5,
@@ -134,21 +141,27 @@ export function generateSceneAssets(
     for (let y = 0; y < gridSize; y++) {
       const offsetX = (x - (gridSize - 1) / 2) * spacing;
       const offsetY = (y - (gridSize - 1) / 2) * spacing;
-      const isCenter = x === Math.floor(gridSize / 2) && y === Math.floor(gridSize / 2);
+      const isCenter =
+        x === Math.floor(gridSize / 2) && y === Math.floor(gridSize / 2);
       const rand = Math.random();
 
       const size = getSizeFromCenter(x, y, gridSize, baseSize);
       const position = new THREE.Vector3(
         offsetX + (Math.random() - 0.5) * 0.1,
         offsetY + (Math.random() - 0.5) * 0.1,
-        (Math.random() - 0.5) * 0.2
+        (Math.random() - 0.5) * 0.2,
       );
 
       let asset: { mesh: THREE.Mesh; shouldRotate: boolean };
 
       // Decide asset type: 30% sphere, 10% cone, 60% cube (or always sphere in center)
       if (isCenter || rand < sphereProbability) {
-        asset = createSphere(size, position, sphereMaterial, enableRandomRotation);
+        asset = createSphere(
+          size,
+          position,
+          sphereMaterial,
+          enableRandomRotation,
+        );
         spheres.push(asset.mesh);
       } else if (rand < sphereProbability + 0.1) {
         // 10% chance for cone
@@ -157,7 +170,13 @@ export function generateSceneAssets(
       } else {
         // Cube
         const color = (x + y) % 2 === 0 ? 0xf59e0b : 0x3b82f6; // Orange or Blue
-        asset = createCube(size, position, color, cubeMaterial, enableRandomRotation);
+        asset = createCube(
+          size,
+          position,
+          color,
+          cubeMaterial,
+          enableRandomRotation,
+        );
         cubes.push(asset.mesh);
       }
 
@@ -174,27 +193,39 @@ export function generateSceneAssets(
     for (let y = 0; y < gridSize; y++) {
       const offsetX = (x - (gridSize - 1) / 2) * spacing;
       const offsetY = (y - (gridSize - 1) / 2) * spacing;
-      const isCenter = x === Math.floor(gridSize / 2) && y === Math.floor(gridSize / 2);
+      const isCenter =
+        x === Math.floor(gridSize / 2) && y === Math.floor(gridSize / 2);
       const rand = Math.random();
 
       const size = getSizeFromCenter(x, y, gridSize, baseSize);
       const position = new THREE.Vector3(
         offsetX + (Math.random() - 0.5) * 0.1,
         offsetY + (Math.random() - 0.5) * 0.1,
-        -spacing * 2 + (Math.random() - 0.5) * 0.2
+        -spacing * 2 + (Math.random() - 0.5) * 0.2,
       );
 
       let asset: { mesh: THREE.Mesh; shouldRotate: boolean };
 
       if (isCenter || rand < sphereProbability) {
-        asset = createSphere(size, position, sphereMaterial, enableRandomRotation);
+        asset = createSphere(
+          size,
+          position,
+          sphereMaterial,
+          enableRandomRotation,
+        );
         spheres.push(asset.mesh);
       } else if (rand < sphereProbability + 0.1) {
         asset = createCone(size, position, cubeMaterial, enableRandomRotation);
         cones.push(asset.mesh);
       } else {
         const color = (x + y) % 2 === 0 ? 0x3b82f6 : 0xf59e0b; // Inverted colors
-        asset = createCube(size, position, color, cubeMaterial, enableRandomRotation);
+        asset = createCube(
+          size,
+          position,
+          color,
+          cubeMaterial,
+          enableRandomRotation,
+        );
         cubes.push(asset.mesh);
       }
 
@@ -212,7 +243,7 @@ export function generateSceneAssets(
     const position = new THREE.Vector3(
       (Math.random() - 0.5) * 4,
       (Math.random() - 0.5) * 4,
-      (Math.random() - 0.5) * 2
+      (Math.random() - 0.5) * 2,
     );
 
     const rand = Math.random();
@@ -220,7 +251,12 @@ export function generateSceneAssets(
 
     if (rand < 0.5) {
       // Sphere
-      asset = createSphere(size, position, sphereMaterial, enableRandomRotation);
+      asset = createSphere(
+        size,
+        position,
+        sphereMaterial,
+        enableRandomRotation,
+      );
       spheres.push(asset.mesh);
     } else if (rand < 0.7) {
       // Cone
@@ -229,7 +265,13 @@ export function generateSceneAssets(
     } else {
       // Cube
       const color = Math.random() < 0.5 ? 0xf59e0b : 0x3b82f6;
-      asset = createCube(size, position, color, cubeMaterial, enableRandomRotation);
+      asset = createCube(
+        size,
+        position,
+        color,
+        cubeMaterial,
+        enableRandomRotation,
+      );
       cubes.push(asset.mesh);
     }
 

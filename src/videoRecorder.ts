@@ -1,4 +1,4 @@
-import * as Tone from 'tone';
+import * as Tone from "tone";
 
 export interface RecordingElements {
   threeCanvas: HTMLCanvasElement;
@@ -16,11 +16,12 @@ export class VideoRecorder {
   private audioDestination: MediaStreamAudioDestinationNode | null = null;
   private audioStream: MediaStream | null = null;
   private elements: RecordingElements | null = null;
-  private onStatusUpdate: ((status: string, className: string) => void) | null = null;
+  private onStatusUpdate: ((status: string, className: string) => void) | null =
+    null;
 
   constructor(
     elements: RecordingElements,
-    onStatusUpdate?: (status: string, className: string) => void
+    onStatusUpdate?: (status: string, className: string) => void,
   ) {
     this.elements = elements;
     this.onStatusUpdate = onStatusUpdate || null;
@@ -32,16 +33,16 @@ export class VideoRecorder {
     // Standard Reel dimensions: 1080x1920 (portrait)
     const reelWidth = 1080;
     const reelHeight = 1920;
-    
-    this.compositionCanvas = document.createElement('canvas');
+
+    this.compositionCanvas = document.createElement("canvas");
     this.compositionCanvas.width = reelWidth;
     this.compositionCanvas.height = reelHeight;
-    this.compositionCtx = this.compositionCanvas.getContext('2d', {
+    this.compositionCtx = this.compositionCanvas.getContext("2d", {
       alpha: false, // Better performance for video
     });
 
     if (!this.compositionCtx) {
-      throw new Error('Could not get composition canvas context');
+      throw new Error("Could not get composition canvas context");
     }
   }
 
@@ -72,7 +73,7 @@ export class VideoRecorder {
         this.audioStream = this.audioDestination.stream;
       }
     } catch (error) {
-      console.warn('Error connecting audio for recording:', error);
+      console.warn("Error connecting audio for recording:", error);
       this.audioDestination = null;
       this.audioStream = null;
     }
@@ -89,7 +90,7 @@ export class VideoRecorder {
         this.audioDestination = audioContext.createMediaStreamDestination();
         this.audioStream = this.audioDestination.stream;
       } catch (error) {
-        console.warn('Error creating audio destination:', error);
+        console.warn("Error creating audio destination:", error);
         this.audioDestination = null;
         this.audioStream = null;
       }
@@ -98,21 +99,26 @@ export class VideoRecorder {
   }
 
   private drawCompositionFrame() {
-    if (!this.compositionCanvas || !this.compositionCtx || !this.isRecording || !this.elements) {
+    if (
+      !this.compositionCanvas ||
+      !this.compositionCtx ||
+      !this.isRecording ||
+      !this.elements
+    ) {
       return;
     }
 
     const { threeCanvas, videoElement, canvasElement } = this.elements;
     const width = this.compositionCanvas.width; // 1080
     const height = this.compositionCanvas.height; // 1920
-    
+
     // Three.js canvas takes 55% of height (top portion)
     const threeCanvasHeight = Math.floor(height * 0.55); // 1056px
     // Video takes 45% of height (bottom portion)
     const videoHeight = height - threeCanvasHeight; // 864px
 
     // Clear the composition canvas
-    this.compositionCtx.fillStyle = '#0d1117';
+    this.compositionCtx.fillStyle = "#0d1117";
     this.compositionCtx.fillRect(0, 0, width, height);
 
     // Draw Three.js canvas on top 55%
@@ -120,12 +126,12 @@ export class VideoRecorder {
       // Scale Three.js canvas to fit the width while maintaining aspect ratio
       const threeCanvasAspect = threeCanvas.width / threeCanvas.height;
       const targetAspect = width / threeCanvasHeight;
-      
+
       let drawWidth = width;
       let drawHeight = threeCanvasHeight;
       let offsetX = 0;
       let offsetY = 0;
-      
+
       if (threeCanvasAspect > targetAspect) {
         // Three.js canvas is wider - fit to height and crop sides
         drawHeight = threeCanvasHeight;
@@ -137,18 +143,22 @@ export class VideoRecorder {
         drawHeight = drawWidth / threeCanvasAspect;
         offsetY = (threeCanvasHeight - drawHeight) / 2;
       }
-      
+
       this.compositionCtx.drawImage(
         threeCanvas,
         offsetX,
         offsetY,
         drawWidth,
-        drawHeight
+        drawHeight,
       );
     }
 
     // Draw video + MediaPipe canvas on bottom 45%
-    if (videoElement && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
+    if (
+      videoElement &&
+      videoElement.videoWidth > 0 &&
+      videoElement.videoHeight > 0
+    ) {
       const videoAspect = videoElement.videoWidth / videoElement.videoHeight;
       const targetAspect = width / videoHeight;
 
@@ -167,7 +177,7 @@ export class VideoRecorder {
         drawHeight = videoHeight;
         drawWidth = drawHeight * targetAspect; // Use target aspect to fill width
         offsetX = (width - drawWidth) / 2;
-        
+
         // Calculate source crop to center the video
         const scale = videoElement.videoHeight / drawHeight;
         sourceWidth = drawWidth * scale;
@@ -178,7 +188,7 @@ export class VideoRecorder {
         drawWidth = width;
         drawHeight = drawWidth / targetAspect; // Use target aspect to fill height
         offsetY = threeCanvasHeight + (videoHeight - drawHeight) / 2;
-        
+
         // Calculate source crop to center the video
         const scale = videoElement.videoWidth / drawWidth;
         sourceHeight = drawHeight * scale;
@@ -190,20 +200,30 @@ export class VideoRecorder {
       this.compositionCtx.scale(-1, 1); // Mirror the video
       this.compositionCtx.drawImage(
         videoElement,
-        sourceX, sourceY, sourceWidth, sourceHeight, // Source rectangle (crop)
-        -offsetX - drawWidth, offsetY, drawWidth, drawHeight // Destination rectangle
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight, // Source rectangle (crop)
+        -offsetX - drawWidth,
+        offsetY,
+        drawWidth,
+        drawHeight, // Destination rectangle
       );
       this.compositionCtx.restore();
 
       // Draw MediaPipe canvas overlay on top of video (mirrored and cropped)
-      if (canvasElement && canvasElement.width > 0 && canvasElement.height > 0) {
+      if (
+        canvasElement &&
+        canvasElement.width > 0 &&
+        canvasElement.height > 0
+      ) {
         // Calculate the same crop for the canvas overlay
         const canvasAspect = canvasElement.width / canvasElement.height;
         let canvasSourceX = 0;
         let canvasSourceY = 0;
         let canvasSourceWidth = canvasElement.width;
         let canvasSourceHeight = canvasElement.height;
-        
+
         if (videoAspect > targetAspect) {
           // Same crop as video
           const scale = canvasElement.height / drawHeight;
@@ -215,13 +235,19 @@ export class VideoRecorder {
           canvasSourceHeight = drawHeight * scale;
           canvasSourceY = (canvasElement.height - canvasSourceHeight) / 2;
         }
-        
+
         this.compositionCtx.save();
         this.compositionCtx.scale(-1, 1); // Mirror the canvas overlay
         this.compositionCtx.drawImage(
           canvasElement,
-          canvasSourceX, canvasSourceY, canvasSourceWidth, canvasSourceHeight, // Source rectangle (crop)
-          -offsetX - drawWidth, offsetY, drawWidth, drawHeight // Destination rectangle
+          canvasSourceX,
+          canvasSourceY,
+          canvasSourceWidth,
+          canvasSourceHeight, // Source rectangle (crop)
+          -offsetX - drawWidth,
+          offsetY,
+          drawWidth,
+          drawHeight, // Destination rectangle
         );
         this.compositionCtx.restore();
       }
@@ -229,20 +255,22 @@ export class VideoRecorder {
 
     // Continue recording animation
     if (this.isRecording) {
-      this.recordingAnimationFrame = requestAnimationFrame(() => this.drawCompositionFrame());
+      this.recordingAnimationFrame = requestAnimationFrame(() =>
+        this.drawCompositionFrame(),
+      );
     }
   }
 
   public async startRecording(): Promise<void> {
     if (this.isRecording) {
-      console.warn('Recording already in progress');
+      console.warn("Recording already in progress");
       return;
     }
 
     if (!this.compositionCanvas || !this.compositionCtx || !this.elements) {
       this.initializeCompositionCanvas();
       if (!this.compositionCanvas || !this.compositionCtx) {
-        throw new Error('Failed to initialize composition canvas');
+        throw new Error("Failed to initialize composition canvas");
       }
     }
 
@@ -273,11 +301,11 @@ export class VideoRecorder {
       // Determine the best MIME type
       const options: MediaRecorderOptions = {};
       const mimeTypes = [
-        'video/webm;codecs=vp9,opus',
-        'video/webm;codecs=vp8,opus',
-        'video/webm;codecs=vp9',
-        'video/webm;codecs=vp8',
-        'video/webm',
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm;codecs=vp9",
+        "video/webm;codecs=vp8",
+        "video/webm",
       ];
 
       for (const mimeType of mimeTypes) {
@@ -302,8 +330,8 @@ export class VideoRecorder {
       };
 
       this.mediaRecorder.onerror = (event) => {
-        console.error('MediaRecorder error:', event);
-        this.updateStatus('Recording error occurred', 'error');
+        console.error("MediaRecorder error:", event);
+        this.updateStatus("Recording error occurred", "error");
       };
 
       // Start recording
@@ -314,11 +342,11 @@ export class VideoRecorder {
       this.drawCompositionFrame();
 
       // Update UI
-      this.updateStatus('Recording...', 'recording');
+      this.updateStatus("Recording...", "recording");
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error("Error starting recording:", error);
       this.isRecording = false;
-      this.updateStatus('Error starting recording', 'error');
+      this.updateStatus("Error starting recording", "error");
       throw error;
     }
   }
@@ -328,7 +356,7 @@ export class VideoRecorder {
       return;
     }
 
-    if (this.mediaRecorder.state === 'recording') {
+    if (this.mediaRecorder.state === "recording") {
       this.isRecording = false;
       this.mediaRecorder.stop();
 
@@ -338,20 +366,20 @@ export class VideoRecorder {
         this.recordingAnimationFrame = null;
       }
 
-      this.updateStatus('Processing recording...', '');
+      this.updateStatus("Processing recording...", "");
     }
   }
 
   private handleRecordingStop() {
     // Create blob and download
     if (this.recordedChunks.length === 0) {
-      this.updateStatus('No recording data available', 'error');
+      this.updateStatus("No recording data available", "error");
       return;
     }
 
-    const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+    const blob = new Blob(this.recordedChunks, { type: "video/webm" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `handtracker-recording-${Date.now()}.webm`;
     document.body.appendChild(a);
@@ -365,7 +393,7 @@ export class VideoRecorder {
 
     // Cleanup
     this.recordedChunks = [];
-    this.updateStatus('Recording saved', '');
+    this.updateStatus("Recording saved", "");
   }
 
   private updateStatus(status: string, className: string) {
@@ -388,7 +416,7 @@ export class VideoRecorder {
       this.recordingAnimationFrame = null;
     }
 
-    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+    if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
       this.mediaRecorder.stop();
     }
 
@@ -411,4 +439,3 @@ export class VideoRecorder {
     // No resize needed
   }
 }
-

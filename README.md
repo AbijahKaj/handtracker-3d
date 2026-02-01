@@ -37,4 +37,3 @@ Built with TypeScript, Vite, Three.js, MediaPipe, and Tone.js.
 
 - Modern browser with WebGL support
 - Webcam access
-- Microphone access (for audio feedback and recording)

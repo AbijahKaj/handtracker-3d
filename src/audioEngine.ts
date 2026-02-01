@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import * as Tone from 'tone';
+import * as THREE from "three";
+import * as Tone from "tone";
 
 export interface AudioMetrics {
   rotationSpeed: number;
@@ -46,7 +46,7 @@ export class DynamicAudioEngine {
   private smoothingFactor: number = 0.15; // Lower = more smoothing (0-1)
 
   // Side detection and melody
-  private currentSide: string = 'center';
+  private currentSide: string = "center";
   private sideNotes: Map<string, number[]> = new Map();
   private melodySequences: Map<string, Tone.Sequence | null> = new Map();
   private melodyInterval: number = 0.4; // Time between melody notes
@@ -61,13 +61,13 @@ export class DynamicAudioEngine {
     this.masterVolume.toDestination();
 
     // Initialize side notes (different scales for different sides)
-    this.sideNotes.set('front', SCALE_MAJOR);
-    this.sideNotes.set('back', SCALE_MINOR);
-    this.sideNotes.set('left', SCALE_PENTATONIC);
-    this.sideNotes.set('right', SCALE_PENTATONIC);
-    this.sideNotes.set('top', SCALE_MAJOR);
-    this.sideNotes.set('bottom', SCALE_MINOR);
-    this.sideNotes.set('center', SCALE_PENTATONIC);
+    this.sideNotes.set("front", SCALE_MAJOR);
+    this.sideNotes.set("back", SCALE_MINOR);
+    this.sideNotes.set("left", SCALE_PENTATONIC);
+    this.sideNotes.set("right", SCALE_PENTATONIC);
+    this.sideNotes.set("top", SCALE_MAJOR);
+    this.sideNotes.set("bottom", SCALE_MINOR);
+    this.sideNotes.set("center", SCALE_PENTATONIC);
   }
 
   // Resume audio context (required after user interaction)
@@ -80,7 +80,7 @@ export class DynamicAudioEngine {
   private initializeSynths() {
     // Rotation synth - smooth, melodic
     this.rotationSynth = new Tone.Synth({
-      oscillator: { type: 'sine' },
+      oscillator: { type: "sine" },
       envelope: {
         attack: 0.2,
         decay: 0.3,
@@ -91,7 +91,7 @@ export class DynamicAudioEngine {
 
     // Pan synth - lower, rumbling
     this.panSynth = new Tone.Synth({
-      oscillator: { type: 'triangle' },
+      oscillator: { type: "triangle" },
       envelope: {
         attack: 0.2,
         decay: 0.4,
@@ -102,7 +102,7 @@ export class DynamicAudioEngine {
 
     // Zoom synth - whooshing
     this.zoomSynth = new Tone.Synth({
-      oscillator: { type: 'sawtooth' },
+      oscillator: { type: "sawtooth" },
       envelope: {
         attack: 0.1,
         decay: 0.3,
@@ -112,10 +112,10 @@ export class DynamicAudioEngine {
     }).connect(this.masterVolume);
 
     // Side-specific polyphonic synths for melodies
-    const sides = ['front', 'back', 'left', 'right', 'top', 'bottom', 'center'];
+    const sides = ["front", "back", "left", "right", "top", "bottom", "center"];
     sides.forEach((side) => {
       const synth = new Tone.PolySynth(Tone.Synth, {
-        oscillator: { type: 'sine' },
+        oscillator: { type: "sine" },
         envelope: {
           attack: 0.15,
           decay: 0.3,
@@ -129,7 +129,11 @@ export class DynamicAudioEngine {
   }
 
   // Smooth a value using exponential moving average
-  private smoothValue(current: number, previous: number, factor: number): number {
+  private smoothValue(
+    current: number,
+    previous: number,
+    factor: number,
+  ): number {
     return previous * (1 - factor) + current * factor;
   }
 
@@ -158,14 +162,19 @@ export class DynamicAudioEngine {
   }
 
   // Set up recording destination - connects master volume to recording destination
-  setupRecordingDestination(destination: MediaStreamAudioDestinationNode): void {
+  setupRecordingDestination(
+    destination: MediaStreamAudioDestinationNode,
+  ): void {
     this.recordingDestination = destination;
     // Connect master volume to recording destination in addition to main destination
     // Tone.js nodes can connect to multiple destinations
     try {
       (this.masterVolume as any).connect(destination);
     } catch (error) {
-      console.warn('Error connecting master volume to recording destination:', error);
+      console.warn(
+        "Error connecting master volume to recording destination:",
+        error,
+      );
     }
   }
 
@@ -175,7 +184,7 @@ export class DynamicAudioEngine {
       try {
         (this.masterVolume as any).disconnect(this.recordingDestination);
       } catch (error) {
-        console.warn('Error disconnecting recording destination:', error);
+        console.warn("Error disconnecting recording destination:", error);
       }
       this.recordingDestination = null;
     }
@@ -226,7 +235,7 @@ export class DynamicAudioEngine {
 
     // Find side with highest dot product (most facing camera)
     let maxDot = -Infinity;
-    let detectedSide = 'center';
+    let detectedSide = "center";
 
     Object.entries(sides).forEach(([side, direction]) => {
       const dot = direction.dot(cameraDirection);
@@ -243,7 +252,9 @@ export class DynamicAudioEngine {
   private getMelodyNotes(side: string): number[] {
     const scale = this.sideNotes.get(side) || SCALE_PENTATONIC;
     const melodyIndices = MELODIES[side] || MELODIES.center;
-    return melodyIndices.map((index) => scale[Math.min(index, scale.length - 1)]);
+    return melodyIndices.map(
+      (index) => scale[Math.min(index, scale.length - 1)],
+    );
   }
 
   // Start/update side-specific melody
@@ -293,7 +304,7 @@ export class DynamicAudioEngine {
           }
         },
         notes,
-        noteDuration
+        noteDuration,
       );
 
       sequence.start(0);
@@ -309,7 +320,7 @@ export class DynamicAudioEngine {
     this.smoothedRotationSpeed = this.smoothValue(
       speed,
       this.smoothedRotationSpeed,
-      this.smoothingFactor
+      this.smoothingFactor,
     );
 
     if (this.smoothedRotationSpeed < this.MIN_SPEED_THRESHOLD) {
@@ -318,7 +329,7 @@ export class DynamicAudioEngine {
     }
 
     // Debounce
-    if (!this.canPlaySound('rotation')) return;
+    if (!this.canPlaySound("rotation")) return;
 
     // Map speed to frequency (musical note)
     const baseFreq = 220; // A3
@@ -334,7 +345,11 @@ export class DynamicAudioEngine {
     if (!this.panSynth || !this.isEnabled) return;
 
     // Smooth the speed
-    this.smoothedPanSpeed = this.smoothValue(speed, this.smoothedPanSpeed, this.smoothingFactor);
+    this.smoothedPanSpeed = this.smoothValue(
+      speed,
+      this.smoothedPanSpeed,
+      this.smoothingFactor,
+    );
 
     if (this.smoothedPanSpeed < this.MIN_SPEED_THRESHOLD) {
       this.panSynth.triggerRelease();
@@ -342,7 +357,7 @@ export class DynamicAudioEngine {
     }
 
     // Debounce
-    if (!this.canPlaySound('pan')) return;
+    if (!this.canPlaySound("pan")) return;
 
     // Lower frequency for panning
     const freq = 80 + this.smoothedPanSpeed * 25; // Reduced multiplier
@@ -357,7 +372,11 @@ export class DynamicAudioEngine {
     if (!this.zoomSynth || !this.isEnabled) return;
 
     // Smooth the speed
-    this.smoothedZoomSpeed = this.smoothValue(speed, this.smoothedZoomSpeed, this.smoothingFactor);
+    this.smoothedZoomSpeed = this.smoothValue(
+      speed,
+      this.smoothedZoomSpeed,
+      this.smoothingFactor,
+    );
 
     if (this.smoothedZoomSpeed < this.MIN_SPEED_THRESHOLD) {
       this.zoomSynth.triggerRelease();
@@ -365,7 +384,7 @@ export class DynamicAudioEngine {
     }
 
     // Debounce
-    if (!this.canPlaySound('zoom')) return;
+    if (!this.canPlaySound("zoom")) return;
 
     const freq = 150 + zoomLevel * 40; // Reduced multiplier
     const volume = Math.min(this.smoothedZoomSpeed * 15 - 25, 0);
@@ -391,7 +410,7 @@ export class DynamicAudioEngine {
     panDirection: THREE.Vector3,
     zoomLevel: number,
     cubes: THREE.Mesh[],
-    camera: THREE.Camera
+    camera: THREE.Camera,
   ) {
     if (!this.isEnabled || !this.areSynthsReady()) return;
 

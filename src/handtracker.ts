@@ -1,8 +1,8 @@
-import * as THREE from 'three';
-import { HandLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
-import { generateSceneAssets, GeneratedAssets } from './sceneAssets';
-import { DynamicAudioEngine, AudioMetrics } from './audioEngine';
-import { VideoRecorder } from './videoRecorder';
+import * as THREE from "three";
+import { HandLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import { generateSceneAssets, GeneratedAssets } from "./sceneAssets";
+import { DynamicAudioEngine, AudioMetrics } from "./audioEngine";
+import { VideoRecorder } from "./videoRecorder";
 
 /*!
  * MIT License
@@ -28,19 +28,27 @@ import { VideoRecorder } from './videoRecorder';
  * SOFTWARE.
  */
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
   // Get DOM elements
-  const videoElement = document.getElementById('video') as HTMLVideoElement;
+  const videoElement = document.getElementById("video") as HTMLVideoElement;
   if (!(videoElement instanceof HTMLVideoElement)) {
-    throw new Error('Video element not found or wrong type');
+    throw new Error("Video element not found or wrong type");
   }
-  const canvasElement = document.getElementById('canvas') as HTMLCanvasElement;
-  const threeCanvas = document.getElementById('threeCanvas') as HTMLCanvasElement;
-  const statusElement = document.getElementById('status') as HTMLDivElement;
-  const startButton = document.getElementById('startButton') as HTMLButtonElement;
-  const stopButton = document.getElementById('stopButton') as HTMLButtonElement;
-  const recordButton = document.getElementById('recordButton') as HTMLButtonElement;
-  const videoContainer = document.getElementById('videoContainer') as HTMLDivElement;
+  const canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
+  const threeCanvas = document.getElementById(
+    "threeCanvas",
+  ) as HTMLCanvasElement;
+  const statusElement = document.getElementById("status") as HTMLDivElement;
+  const startButton = document.getElementById(
+    "startButton",
+  ) as HTMLButtonElement;
+  const stopButton = document.getElementById("stopButton") as HTMLButtonElement;
+  const recordButton = document.getElementById(
+    "recordButton",
+  ) as HTMLButtonElement;
+  const videoContainer = document.getElementById(
+    "videoContainer",
+  ) as HTMLDivElement;
 
   if (
     !videoElement ||
@@ -52,12 +60,12 @@ window.addEventListener('DOMContentLoaded', () => {
     !recordButton ||
     !videoContainer
   ) {
-    throw new Error('Required DOM elements not found');
+    throw new Error("Required DOM elements not found");
   }
 
-  const canvasCtx = canvasElement.getContext('2d');
+  const canvasCtx = canvasElement.getContext("2d");
   if (!canvasCtx) {
-    throw new Error('Could not get canvas context');
+    throw new Error("Could not get canvas context");
   }
 
   // Set canvas size
@@ -70,8 +78,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Initialize camera and renderer with mobile-responsive sizing
   const isMobile = window.innerWidth <= 768;
-  const initialHeight = isMobile ? window.innerHeight * 0.5 : window.innerHeight;
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / initialHeight, 0.1, 1000);
+  const initialHeight = isMobile
+    ? window.innerHeight * 0.5
+    : window.innerHeight;
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / initialHeight,
+    0.1,
+    1000,
+  );
   camera.position.z = 5;
 
   const renderer = new THREE.WebGLRenderer({
@@ -97,14 +112,19 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // Generate scene assets with random rotation enabled
-  const assets: GeneratedAssets = generateSceneAssets(scene, cubeMaterial, sphereMaterial, {
-    gridSize: 5,
-    spacing: 0.5,
-    baseSize: 0.15,
-    sphereProbability: 0.3,
-    randomSpheresCount: 15,
-    enableRandomRotation: true,
-  });
+  const assets: GeneratedAssets = generateSceneAssets(
+    scene,
+    cubeMaterial,
+    sphereMaterial,
+    {
+      gridSize: 5,
+      spacing: 0.5,
+      baseSize: 0.15,
+      sphereProbability: 0.3,
+      randomSpheresCount: 15,
+      enableRandomRotation: true,
+    },
+  );
 
   const cubeGroup = assets.group;
   const cubes = assets.cubes;
@@ -176,11 +196,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // Initialize HandLandmarker on page load (not when camera starts)
   async function initializeHandLandmarker() {
     try {
-      statusElement.textContent = 'Loading MediaPipe model...';
-      statusElement.className = 'loading';
+      statusElement.textContent = "Loading MediaPipe model...";
+      statusElement.className = "loading";
 
       const vision = await FilesetResolver.forVisionTasks(
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
       );
 
       // Start with VIDEO mode directly since that's what we'll be using
@@ -189,38 +209,39 @@ window.addEventListener('DOMContentLoaded', () => {
         handLandmarker = await HandLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
-            delegate: 'GPU',
+            delegate: "GPU",
           },
           numHands: 2,
-          runningMode: 'VIDEO', // Start with VIDEO mode directly
+          runningMode: "VIDEO", // Start with VIDEO mode directly
           minHandDetectionConfidence: 0.5,
           minHandPresenceConfidence: 0.5,
           minTrackingConfidence: 0.5,
         });
       } catch (gpuError) {
-        console.warn('GPU initialization failed, trying CPU:', gpuError);
+        console.warn("GPU initialization failed, trying CPU:", gpuError);
         handLandmarker = await HandLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
-            delegate: 'CPU',
+            delegate: "CPU",
           },
           numHands: 2,
-          runningMode: 'VIDEO', // Start with VIDEO mode directly
+          runningMode: "VIDEO", // Start with VIDEO mode directly
           minHandDetectionConfidence: 0.5,
           minHandPresenceConfidence: 0.5,
           minTrackingConfidence: 0.5,
         });
       }
 
-      statusElement.textContent = 'Model loaded. Click "Start Hand Tracking" to begin.';
-      statusElement.className = '';
+      statusElement.textContent =
+        'Model loaded. Click "Start Hand Tracking" to begin.';
+      statusElement.className = "";
       startButton.disabled = false;
     } catch (error) {
-      console.error('Error initializing HandLandmarker:', error);
-      statusElement.textContent = 'Error loading model. Check console.';
-      statusElement.className = 'error';
+      console.error("Error initializing HandLandmarker:", error);
+      statusElement.textContent = "Error loading model. Check console.";
+      statusElement.className = "error";
       startButton.disabled = false;
-      startButton.textContent = 'Retry';
+      startButton.textContent = "Retry";
     }
   }
 
@@ -233,12 +254,18 @@ window.addEventListener('DOMContentLoaded', () => {
     x: number,
     y: number,
     radius: number,
-    color: string
+    color: string,
   ) {
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(x * canvasElement.width, y * canvasElement.height, radius, 0, Math.PI * 2);
+    ctx.arc(
+      x * canvasElement.width,
+      y * canvasElement.height,
+      radius,
+      0,
+      Math.PI * 2,
+    );
     ctx.stroke();
   }
 
@@ -250,7 +277,7 @@ window.addEventListener('DOMContentLoaded', () => {
     x2: number,
     y2: number,
     color: string,
-    lineWidth: number = 2
+    lineWidth: number = 2,
   ) {
     ctx.strokeStyle = color;
     ctx.lineWidth = lineWidth;
@@ -266,12 +293,12 @@ window.addEventListener('DOMContentLoaded', () => {
     text: string,
     x: number,
     y: number,
-    color: string = '#FFFFFF',
-    fontSize: number = 14
+    color: string = "#FFFFFF",
+    fontSize: number = 14,
   ) {
     ctx.fillStyle = color;
     ctx.font = `${fontSize}px Arial`;
-    ctx.textAlign = 'center';
+    ctx.textAlign = "center";
     ctx.fillText(text, x * canvasElement.width, y * canvasElement.height);
   }
 
@@ -281,7 +308,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.drawImage(
+      videoElement,
+      0,
+      0,
+      canvasElement.width,
+      canvasElement.height,
+    );
 
     // The new API returns results.landmarks directly (array of landmarks arrays)
     // Each landmark is an array of {x, y, z} objects
@@ -291,8 +324,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (landmarks.length > 0) {
       const handCount = landmarks.length;
-      statusElement.textContent = `${handCount} hand${handCount > 1 ? 's' : ''} detected`;
-      statusElement.className = '';
+      statusElement.textContent = `${handCount} hand${handCount > 1 ? "s" : ""} detected`;
+      statusElement.className = "";
       isHandControlled = true;
 
       // Find left and right hands based on handedness
@@ -301,10 +334,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
       for (let i = 0; i < landmarks.length; i++) {
         if (handednesses[i] && handednesses[i].length > 0) {
-          const categoryName = handednesses[i][0]?.categoryName || '';
-          if (categoryName === 'Left') {
+          const categoryName = handednesses[i][0]?.categoryName || "";
+          if (categoryName === "Left") {
             leftHandIndex = i;
-          } else if (categoryName === 'Right') {
+          } else if (categoryName === "Right") {
             rightHandIndex = i;
           }
         }
@@ -327,7 +360,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // Left hand controls rotation, right hand controls zoom
       const rotationHandIndex = leftHandIndex >= 0 ? leftHandIndex : 0;
-      const zoomHandIndex = rightHandIndex >= 0 ? rightHandIndex : landmarks.length > 1 ? 1 : -1;
+      const zoomHandIndex =
+        rightHandIndex >= 0 ? rightHandIndex : landmarks.length > 1 ? 1 : -1;
 
       // Process rotation hand (left hand)
       const rotationHand = landmarks[rotationHandIndex];
@@ -356,13 +390,16 @@ window.addEventListener('DOMContentLoaded', () => {
           calibrationFrames++;
           // Update calibration average
           hand0Calibration.x =
-            (hand0Calibration.x * (calibrationFrames - 1) + rotationHandWrist.x) /
+            (hand0Calibration.x * (calibrationFrames - 1) +
+              rotationHandWrist.x) /
             calibrationFrames;
           hand0Calibration.y =
-            (hand0Calibration.y * (calibrationFrames - 1) + rotationHandWrist.y) /
+            (hand0Calibration.y * (calibrationFrames - 1) +
+              rotationHandWrist.y) /
             calibrationFrames;
           hand0Calibration.z =
-            (hand0Calibration.z * (calibrationFrames - 1) + rotationHandWrist.z) /
+            (hand0Calibration.z * (calibrationFrames - 1) +
+              rotationHandWrist.z) /
             calibrationFrames;
         }
 
@@ -385,7 +422,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const rotationHandPinchDistance = Math.sqrt(
         Math.pow(rotationHandThumb.x - rotationHandIndexTip.x, 2) +
           Math.pow(rotationHandThumb.y - rotationHandIndexTip.y, 2) +
-          Math.pow(rotationHandThumb.z - rotationHandIndexTip.z, 2)
+          Math.pow(rotationHandThumb.z - rotationHandIndexTip.z, 2),
       );
 
       // Map pinch distance to rotation (closer pinch = more rotation)
@@ -396,21 +433,21 @@ window.addEventListener('DOMContentLoaded', () => {
       targetRotation.set(rotationX, rotationY, normalizedPinch);
 
       // Draw thumb and index finger for rotation hand (left hand - green)
-      const rotationHandColor = '#00FF00';
+      const rotationHandColor = "#00FF00";
       const circleRadius = 15;
       drawCircle(
         canvasCtx,
         rotationHandThumb.x,
         rotationHandThumb.y,
         circleRadius,
-        rotationHandColor
+        rotationHandColor,
       );
       drawCircle(
         canvasCtx,
         rotationHandIndexTip.x,
         rotationHandIndexTip.y,
         circleRadius,
-        rotationHandColor
+        rotationHandColor,
       );
       drawLine(
         canvasCtx,
@@ -419,7 +456,7 @@ window.addEventListener('DOMContentLoaded', () => {
         rotationHandIndexTip.x,
         rotationHandIndexTip.y,
         rotationHandColor,
-        3
+        3,
       );
 
       // Draw pinch distance value for rotation hand
@@ -431,7 +468,7 @@ window.addEventListener('DOMContentLoaded', () => {
         midX0,
         midY0 - 0.03,
         rotationHandColor,
-        12
+        12,
       );
 
       // Process zoom hand (right hand) if available
@@ -448,7 +485,11 @@ window.addEventListener('DOMContentLoaded', () => {
         // Calibrate initial zoom hand position
         if (hand1Calibration === null) {
           // Initialize calibration on first frame (should match rotation hand calibration frame)
-          hand1Calibration = { x: zoomHandWrist.x, y: zoomHandWrist.y, z: zoomHandWrist.z };
+          hand1Calibration = {
+            x: zoomHandWrist.x,
+            y: zoomHandWrist.y,
+            z: zoomHandWrist.z,
+          };
           // Still calibrating, keep scene centered
           zoomHandX = 0;
           zoomHandY = 0;
@@ -458,11 +499,14 @@ window.addEventListener('DOMContentLoaded', () => {
           if (calibrationFrames < CALIBRATION_FRAME_COUNT) {
             // Update calibration average
             hand1Calibration.x =
-              (hand1Calibration.x * (calibrationFrames - 1) + zoomHandWrist.x) / calibrationFrames;
+              (hand1Calibration.x * (calibrationFrames - 1) + zoomHandWrist.x) /
+              calibrationFrames;
             hand1Calibration.y =
-              (hand1Calibration.y * (calibrationFrames - 1) + zoomHandWrist.y) / calibrationFrames;
+              (hand1Calibration.y * (calibrationFrames - 1) + zoomHandWrist.y) /
+              calibrationFrames;
             hand1Calibration.z =
-              (hand1Calibration.z * (calibrationFrames - 1) + zoomHandWrist.z) / calibrationFrames;
+              (hand1Calibration.z * (calibrationFrames - 1) + zoomHandWrist.z) /
+              calibrationFrames;
           }
 
           // Use relative positioning from calibrated center
@@ -484,7 +528,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const zoomHandPinchDistance = Math.sqrt(
           Math.pow(zoomHandThumb.x - zoomHandIndexTip.x, 2) +
             Math.pow(zoomHandThumb.y - zoomHandIndexTip.y, 2) +
-            Math.pow(zoomHandThumb.z - zoomHandIndexTip.z, 2)
+            Math.pow(zoomHandThumb.z - zoomHandIndexTip.z, 2),
         );
 
         // Map pinch distance to zoom - no clamping, uses full pinch range
@@ -497,9 +541,21 @@ window.addEventListener('DOMContentLoaded', () => {
         targetZoom = baseZoom + zoomHandPinchDistance * pinchScale;
 
         // Draw thumb and index finger for zoom hand (right hand - blue)
-        const zoomHandColor = '#00AAFF';
-        drawCircle(canvasCtx, zoomHandThumb.x, zoomHandThumb.y, circleRadius, zoomHandColor);
-        drawCircle(canvasCtx, zoomHandIndexTip.x, zoomHandIndexTip.y, circleRadius, zoomHandColor);
+        const zoomHandColor = "#00AAFF";
+        drawCircle(
+          canvasCtx,
+          zoomHandThumb.x,
+          zoomHandThumb.y,
+          circleRadius,
+          zoomHandColor,
+        );
+        drawCircle(
+          canvasCtx,
+          zoomHandIndexTip.x,
+          zoomHandIndexTip.y,
+          circleRadius,
+          zoomHandColor,
+        );
         drawLine(
           canvasCtx,
           zoomHandThumb.x,
@@ -507,7 +563,7 @@ window.addEventListener('DOMContentLoaded', () => {
           zoomHandIndexTip.x,
           zoomHandIndexTip.y,
           zoomHandColor,
-          3
+          3,
         );
 
         // Draw pinch distance value for zoom hand
@@ -519,7 +575,7 @@ window.addEventListener('DOMContentLoaded', () => {
           midX1,
           midY1 - 0.03,
           zoomHandColor,
-          12
+          12,
         );
 
         // Average both hand positions for pan
@@ -527,9 +583,9 @@ window.addEventListener('DOMContentLoaded', () => {
           new THREE.Vector3(
             (rotationHandX + zoomHandX) / 2,
             (rotationHandY + zoomHandY) / 2,
-            (rotationHandZ + zoomHandZ) / 2
+            (rotationHandZ + zoomHandZ) / 2,
           ),
-          0.1
+          0.1,
         );
       } else {
         // Only one hand - use it for pan
@@ -538,8 +594,8 @@ window.addEventListener('DOMContentLoaded', () => {
         targetZoom = 1.0;
       }
     } else {
-      statusElement.textContent = 'No hand detected';
-      statusElement.className = '';
+      statusElement.textContent = "No hand detected";
+      statusElement.className = "";
       isHandControlled = false;
       // Reset to center when no hands
       targetPan.set(0, 0, 0);
@@ -563,15 +619,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
     try {
       startButton.disabled = true;
-      startButton.textContent = 'Starting...';
-      statusElement.textContent = 'Requesting camera access...';
-      statusElement.className = 'loading';
+      startButton.textContent = "Starting...";
+      statusElement.textContent = "Requesting camera access...";
+      statusElement.className = "loading";
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: 640,
           height: 480,
-          facingMode: 'user',
+          facingMode: "user",
         },
       });
 
@@ -580,16 +636,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // Check if model is loaded
       if (!handLandmarker) {
-        statusElement.textContent = 'Model not loaded yet. Please wait...';
-        statusElement.className = 'loading';
+        statusElement.textContent = "Model not loaded yet. Please wait...";
+        statusElement.className = "loading";
         startButton.disabled = false;
-        startButton.textContent = 'Start Hand Tracking';
+        startButton.textContent = "Start Hand Tracking";
         return;
       }
 
       // Set up video stream
       await new Promise((resolve) => {
-        videoElement.addEventListener('loadeddata', () => {
+        videoElement.addEventListener("loadeddata", () => {
           videoElement.play().then(() => {
             resolve(undefined);
           });
@@ -628,7 +684,10 @@ window.addEventListener('DOMContentLoaded', () => {
             lastVideoTime = currentTime;
 
             try {
-              const results = handLandmarker!.detectForVideo(videoElement, startTimeMs);
+              const results = handLandmarker!.detectForVideo(
+                videoElement,
+                startTimeMs,
+              );
 
               if (results) {
                 processHandResults(results);
@@ -636,22 +695,27 @@ window.addEventListener('DOMContentLoaded', () => {
                 // No results - clear canvas and show no hands
                 if (canvasCtx) {
                   canvasCtx.save();
-                  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                  canvasCtx.clearRect(
+                    0,
+                    0,
+                    canvasElement.width,
+                    canvasElement.height,
+                  );
                   canvasCtx.drawImage(
                     videoElement,
                     0,
                     0,
                     canvasElement.width,
-                    canvasElement.height
+                    canvasElement.height,
                   );
                   canvasCtx.restore();
                 }
-                statusElement.textContent = 'No hand detected';
-                statusElement.className = '';
+                statusElement.textContent = "No hand detected";
+                statusElement.className = "";
                 isHandControlled = false;
               }
             } catch (error) {
-              console.error('Error detecting hands:', error);
+              console.error("Error detecting hands:", error);
             }
           }
         }
@@ -678,7 +742,7 @@ window.addEventListener('DOMContentLoaded', () => {
         (status: string, className: string) => {
           statusElement.textContent = status;
           statusElement.className = className;
-        }
+        },
       );
 
       // Set up audio connection for recording
@@ -688,18 +752,19 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       // Hide start button, show stop button, record button and video container
-      startButton.classList.add('hidden');
-      stopButton.classList.remove('hidden');
-      recordButton.classList.remove('hidden');
-      videoContainer.classList.add('visible');
-      statusElement.textContent = 'Camera ready';
-      statusElement.className = '';
+      startButton.classList.add("hidden");
+      stopButton.classList.remove("hidden");
+      recordButton.classList.remove("hidden");
+      videoContainer.classList.add("visible");
+      statusElement.textContent = "Camera ready";
+      statusElement.className = "";
     } catch (error) {
-      console.error('Error accessing camera:', error);
-      statusElement.textContent = 'Camera access denied. Please allow camera access and try again.';
-      statusElement.className = 'error';
+      console.error("Error accessing camera:", error);
+      statusElement.textContent =
+        "Camera access denied. Please allow camera access and try again.";
+      statusElement.className = "error";
       startButton.disabled = false;
-      startButton.textContent = 'Start Hand Tracking';
+      startButton.textContent = "Start Hand Tracking";
     }
   }
 
@@ -761,15 +826,16 @@ window.addEventListener('DOMContentLoaded', () => {
     cubeGroup.scale.set(1, 1, 1);
 
     // Hide stop button, record button and video container, show start button
-    stopButton.classList.add('hidden');
-    recordButton.classList.add('hidden');
-    videoContainer.classList.remove('visible');
-    startButton.classList.remove('hidden');
+    stopButton.classList.add("hidden");
+    recordButton.classList.add("hidden");
+    videoContainer.classList.remove("visible");
+    startButton.classList.remove("hidden");
     startButton.disabled = false;
-    startButton.textContent = 'Start Hand Tracking';
+    startButton.textContent = "Start Hand Tracking";
 
-    statusElement.textContent = 'Stopped. Click "Start Hand Tracking" to begin again.';
-    statusElement.className = '';
+    statusElement.textContent =
+      'Stopped. Click "Start Hand Tracking" to begin again.';
+    statusElement.className = "";
   }
 
   // Animation loop
@@ -786,9 +852,21 @@ window.addEventListener('DOMContentLoaded', () => {
     // Handle rotation - either from hands or auto-rotate
     if (isHandControlled) {
       // Smoothly interpolate rotation (hand 0 controls rotation via pinch)
-      currentRotation.x = THREE.MathUtils.lerp(currentRotation.x, targetRotation.x, 0.1);
-      currentRotation.y = THREE.MathUtils.lerp(currentRotation.y, targetRotation.y, 0.1);
-      currentRotation.z = THREE.MathUtils.lerp(currentRotation.z, targetRotation.z, 0.1);
+      currentRotation.x = THREE.MathUtils.lerp(
+        currentRotation.x,
+        targetRotation.x,
+        0.1,
+      );
+      currentRotation.y = THREE.MathUtils.lerp(
+        currentRotation.y,
+        targetRotation.y,
+        0.1,
+      );
+      currentRotation.z = THREE.MathUtils.lerp(
+        currentRotation.z,
+        targetRotation.z,
+        0.1,
+      );
     } else {
       // Auto-rotate when no hands are detected
       currentRotation.y += autoRotationSpeed;
@@ -801,8 +879,16 @@ window.addEventListener('DOMContentLoaded', () => {
     cubeGroup.scale.setScalar(currentZoom);
 
     // Calculate movement speeds for audio
-    const rotationSpeed = calculateRotationSpeed(previousRotation, currentRotation, deltaTime);
-    const panSpeed = calculatePanSpeed(previousPan, cubeGroup.position, deltaTime);
+    const rotationSpeed = calculateRotationSpeed(
+      previousRotation,
+      currentRotation,
+      deltaTime,
+    );
+    const panSpeed = calculatePanSpeed(
+      previousPan,
+      cubeGroup.position,
+      deltaTime,
+    );
     const zoomSpeed = calculateZoomSpeed(previousZoom, currentZoom, deltaTime);
 
     // Calculate pan direction
@@ -824,7 +910,14 @@ window.addEventListener('DOMContentLoaded', () => {
           zoomSpeed,
           exposedFaces: 0, // Will be calculated in update
         };
-        audioEngine.update(metrics, currentRotation, panDirection, currentZoom, cubes, camera);
+        audioEngine.update(
+          metrics,
+          currentRotation,
+          panDirection,
+          currentZoom,
+          cubes,
+          camera,
+        );
       } else {
         // No movement detected, disable audio
         audioEngine.setEnabled(false);
@@ -881,10 +974,12 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // Handle window resize
-  window.addEventListener('resize', () => {
+  window.addEventListener("resize", () => {
     // On mobile, threeCanvas takes 50% of viewport height
     const isMobile = window.innerWidth <= 768;
-    const canvasHeight = isMobile ? window.innerHeight * 0.5 : window.innerHeight;
+    const canvasHeight = isMobile
+      ? window.innerHeight * 0.5
+      : window.innerHeight;
     const canvasWidth = window.innerWidth;
 
     camera.aspect = canvasWidth / canvasHeight;
@@ -898,42 +993,46 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // Start button click handler
-  startButton.addEventListener('click', () => {
+  startButton.addEventListener("click", () => {
     initializeCamera();
   });
 
   // Stop button click handler
-  stopButton.addEventListener('click', () => {
+  stopButton.addEventListener("click", () => {
     stopCamera();
   });
 
   // Record button click handler
-  recordButton.addEventListener('click', async () => {
+  recordButton.addEventListener("click", async () => {
     if (!videoRecorder) {
-      statusElement.textContent = 'Please start hand tracking first';
-      statusElement.className = 'error';
+      statusElement.textContent = "Please start hand tracking first";
+      statusElement.className = "error";
       return;
     }
 
     if (videoRecorder.isCurrentlyRecording()) {
       videoRecorder.stopRecording();
-      recordButton.textContent = 'Start Recording';
-      recordButton.classList.remove('recording');
+      recordButton.textContent = "Start Recording";
+      recordButton.classList.remove("recording");
     } else {
       try {
         await videoRecorder.startRecording();
-        recordButton.textContent = 'Stop Recording';
-        recordButton.classList.add('recording');
+        recordButton.textContent = "Stop Recording";
+        recordButton.classList.add("recording");
       } catch (error) {
-        console.error('Error starting recording:', error);
-        statusElement.textContent = 'Error starting recording';
-        statusElement.className = 'error';
+        console.error("Error starting recording:", error);
+        statusElement.textContent = "Error starting recording";
+        statusElement.className = "error";
       }
     }
   });
 
   // Helper functions to calculate speeds
-  function calculateRotationSpeed(prev: THREE.Euler, curr: THREE.Euler, deltaTime: number): number {
+  function calculateRotationSpeed(
+    prev: THREE.Euler,
+    curr: THREE.Euler,
+    deltaTime: number,
+  ): number {
     if (deltaTime === 0) return 0;
     const deltaX = Math.abs(curr.x - prev.x);
     const deltaY = Math.abs(curr.y - prev.y);
@@ -942,13 +1041,21 @@ window.addEventListener('DOMContentLoaded', () => {
     return totalDelta / deltaTime;
   }
 
-  function calculatePanSpeed(prev: THREE.Vector3, curr: THREE.Vector3, deltaTime: number): number {
+  function calculatePanSpeed(
+    prev: THREE.Vector3,
+    curr: THREE.Vector3,
+    deltaTime: number,
+  ): number {
     if (deltaTime === 0) return 0;
     const distance = prev.distanceTo(curr);
     return distance / deltaTime;
   }
 
-  function calculateZoomSpeed(prev: number, curr: number, deltaTime: number): number {
+  function calculateZoomSpeed(
+    prev: number,
+    curr: number,
+    deltaTime: number,
+  ): number {
     if (deltaTime === 0) return 0;
     return Math.abs(curr - prev) / deltaTime;
   }
