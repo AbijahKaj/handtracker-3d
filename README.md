@@ -37,3 +37,7 @@ Built with TypeScript, Vite, Three.js, MediaPipe, and Tone.js.
 
 - Modern browser with WebGL support
 - Webcam access
+
+## Attribution
+
+Inspired by [this facebook video](https://www.facebook.com/reel/748257761671884).
